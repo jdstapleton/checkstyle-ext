@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: 'checkstyle'
+
+repositories {
+	mavenCentral()
+}
+
+group = 'com.github.jdstapleton.checkstyle'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+checkstyle.toolVersion = '8.15'
+
+dependencies {
+	compile 'com.puppycrawl.tools:checkstyle:8.15'
+	testCompile 'junit:junit:4.12'
+	testCompile 'com.puppycrawl.tools:checkstyle:8.11:tests'
+}
