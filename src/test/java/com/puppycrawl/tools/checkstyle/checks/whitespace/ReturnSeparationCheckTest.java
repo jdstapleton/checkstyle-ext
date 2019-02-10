@@ -1,7 +1,8 @@
 package com.puppycrawl.tools.checkstyle.checks.whitespace;
 
-import static com.puppycrawl.tools.checkstyle.checks.whitespace.ReturnSeparationCheck.MSG_EMPTY_LINE_BEFORE_RETURN;
+import static com.jamesstapleton.checkstyle.checks.whitespace.ReturnSeparationCheck.MSG_EMPTY_LINE_BEFORE_RETURN;
 
+import com.jamesstapleton.checkstyle.checks.whitespace.ReturnSeparationCheck;
 import org.junit.Test;
 
 import com.google.common.reflect.Reflection;

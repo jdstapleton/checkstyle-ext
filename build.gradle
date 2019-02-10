@@ -1,18 +1,160 @@
+import javax.naming.ConfigurationException
+
 apply plugin: 'java'
 apply plugin: 'checkstyle'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
-group = 'com.github.jdstapleton.checkstyle'
-version = '0.0.1-SNAPSHOT'
+archivesBaseName = "checkstyle-ext"
+group = 'com.jamesstapleton.checkstyle'
+version = '1.0.1'
 sourceCompatibility = 1.8
 
 checkstyle.toolVersion = '8.15'
 
+ext {
+    isReleaseVersion = !version.endsWith("SNAPSHOT")
+    sonatypeUsername = project.findProperty('sonatype.username')
+    sonatypePassword = project.findProperty('sonatype.password')
+}
+
+
 dependencies {
-	compile 'com.puppycrawl.tools:checkstyle:8.15'
-	testCompile 'junit:junit:4.12'
-	testCompile 'com.puppycrawl.tools:checkstyle:8.11:tests'
+    compile 'com.puppycrawl.tools:checkstyle:8.15'
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.puppycrawl.tools:checkstyle:8.11:tests'
+}
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+signing {
+    required { isReleaseVersion }
+    useGpgCmd()
+
+    sign configurations.archives
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            customizePom(pom, rootProject)
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            if (isReleaseVersion) {
+                // sign the pom
+                pom.withXml {
+                    def pomFile = file("${project.buildDir}/generated-pom.xml")
+                    writeTo(pomFile)
+                    def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                    artifact(pomAscFile) {
+                        classifier = null
+                        extension = 'pom.asc'
+                    }
+                    pomFile.delete()
+                }
+
+                project.tasks.signArchives.signatureFiles.each {
+                    artifact(it) {
+                        def matcher = it.file =~ /-(sources|javadoc|jre9)\.jar\.asc$/
+                        if (matcher.find()) {
+                            classifier = matcher.group(1)
+                        } else {
+                            classifier = null
+                        }
+                        extension = 'jar.asc'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name 'sonatype'
+            if (isReleaseVersion) {
+                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            } else {
+                url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            }
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+
+tasks.withType(PublishToMavenRepository) {
+    doFirst {
+        if (!sonatypeUsername) {
+            throw new ConfigurationException(
+                    'Please set the Sonatype username with project property "sonatype.username"')
+        }
+        if (!sonatypePassword) {
+            throw new ConfigurationException(
+                    'Please set the Sonatype password with project property "sonatype.password"')
+        }
+    }
+}
+
+def customizePom(pom, gradleProject) {
+    pom.withXml {
+        def root = asNode()
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            name 'Checkstyle Extensions'
+            description gradleProject.description
+            url 'hhttps://github.com/jdstapleton/checkstyle-ext/'
+            organization {
+                name 'JStapleton github repo'
+                url 'https://github.com/jdstapleton/checkstyle-ext/'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/jdstapleton/checkstyle-ext/issues'
+            }
+            licenses {
+                license {
+                    name 'LGPL-3'
+                    url 'https://opensource.org/licenses/lgpl-3.0.html'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/jdstapleton/checkstyle-ext/'
+                connection 'scm:git:git://github.com:jdstapleton/checkstyle-ext.git'
+                developerConnection 'scm:git:ssh://git@github.com/jdstapleton/checkstyle-ext/'
+            }
+            developers {
+                developer {
+                    id 'jstapleton'
+                    name 'James Stapleton'
+                    email 'github@jamesstapleton.com'
+                }
+            }
+        }
+    }
 }
