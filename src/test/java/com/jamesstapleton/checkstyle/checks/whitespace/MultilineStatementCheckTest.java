@@ -17,16 +17,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.puppycrawl.tools.checkstyle.checks.whitespace;
-
-import static com.puppycrawl.tools.checkstyle.checks.whitespace.MultilineStatementCheck.MSG_KEY;
-
-import org.junit.Test;
+package com.jamesstapleton.checkstyle.checks.whitespace;
 
 import com.google.common.reflect.Reflection;
 import com.puppycrawl.tools.checkstyle.AbstractModuleTestSupport;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
+import org.junit.Test;
+
+import static com.jamesstapleton.checkstyle.checks.whitespace.MultilineStatementCheck.MSG_KEY;
 
 public class MultilineStatementCheckTest
         extends AbstractModuleTestSupport {
@@ -139,6 +138,10 @@ public class MultilineStatementCheckTest
             "118: " + getCheckMessage(MSG_KEY),
             // { with: "No one should do this also."
             "121: " + getCheckMessage(MSG_KEY),
+            // do {
+            "186: " + getCheckMessage(MSG_KEY),
+            // do {
+            "191: " + getCheckMessage(MSG_KEY),
         };
 
         verify(createChecker(checkConfig),
@@ -160,6 +163,17 @@ public class MultilineStatementCheckTest
 
         verify(createChecker(checkConfig),
                 getPath("InputMultilineStatementTrys.java"),
+                expected);
+    }
+
+    @Test
+    public void validateEnum() throws Exception {
+        final DefaultConfiguration checkConfig = createModuleConfig(MultilineStatementCheck.class);
+
+        final String[] expected = { };
+
+        verify(createChecker(checkConfig),
+                getPath("InputMultilineStatementEnums.java"),
                 expected);
     }
 

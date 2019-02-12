@@ -118,43 +118,43 @@ public class MultilineStatementCheck extends AbstractCheck {
      * Tokens to consider as start of a block when encountering the right curly.
      */
     private static final int[] BLOCK_TOKENS = sorted(
-        TokenTypes.SLIST,
-        TokenTypes.LITERAL_WHILE,
-        TokenTypes.LITERAL_FOR,
-        TokenTypes.LITERAL_IF,
-        TokenTypes.LITERAL_SWITCH,
-        TokenTypes.LITERAL_TRY,
-        TokenTypes.INSTANCE_INIT);
+            TokenTypes.SLIST,
+            TokenTypes.LITERAL_WHILE,
+            TokenTypes.LITERAL_FOR,
+            TokenTypes.LITERAL_IF,
+            TokenTypes.LITERAL_SWITCH,
+            TokenTypes.LITERAL_TRY,
+            TokenTypes.INSTANCE_INIT);
 
     /**
      * Right curly to ignore if they are part of these parts of blocks as either other checks
      * has already covered these conditions, or they are part of a larger block.
      */
     private static final int[] NON_PROCESSABLE_RCURLY = sorted(
-        // covered by a different check
-        TokenTypes.CTOR_DEF,
-        // covered by the semi colon in the statement ending the lambda
-        TokenTypes.LAMBDA,
-        // covered by a different check
-        TokenTypes.METHOD_DEF,
-        // covered by the entry being annotated
-        TokenTypes.ANNOTATION,
-        // covered by the entry being annotated
-        TokenTypes.ANNOTATION_MEMBER_VALUE_PAIR,
-        // else branches are always processed via the 'if' start of block
-        TokenTypes.LITERAL_ELSE,
-        // catch statements are always processed via the starting try
-        TokenTypes.LITERAL_CATCH,
-        // finally statements are always processed via the starting try
-        TokenTypes.LITERAL_FINALLY);
+            // covered by a different check
+            TokenTypes.CTOR_DEF,
+            // covered by the semi colon in the statement ending the lambda
+            TokenTypes.LAMBDA,
+            // covered by a different check
+            TokenTypes.METHOD_DEF,
+            // covered by the entry being annotated
+            TokenTypes.ANNOTATION,
+            // covered by the entry being annotated
+            TokenTypes.ANNOTATION_MEMBER_VALUE_PAIR,
+            // else branches are always processed via the 'if' start of block
+            TokenTypes.LITERAL_ELSE,
+            // catch statements are always processed via the starting try
+            TokenTypes.LITERAL_CATCH,
+            // finally statements are always processed via the starting try
+            TokenTypes.LITERAL_FINALLY);
 
     /**
      * The different types of for loops parts, this way we can figure out where the curly belongs.
      */
     private static final int[] FOR_LOOP_DEF = sorted(
-        TokenTypes.FOR_INIT,
-        TokenTypes.FOR_CONDITION,
-        TokenTypes.FOR_ITERATOR);
+            TokenTypes.FOR_INIT,
+            TokenTypes.FOR_CONDITION,
+            TokenTypes.FOR_ITERATOR);
 
     /**
      * The checker will allow declarations immediately before blocks if set to true.
@@ -184,6 +184,7 @@ public class MultilineStatementCheck extends AbstractCheck {
             case TokenTypes.SEMI:
                 if (!isResource(token)
                         && !isForDefinition(token)
+                        && !isForEnumConst(token)
                         && isMultilineStatement(token)) {
                     processStatement(token);
                 }
@@ -271,7 +272,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      * See return documentation.
      *
      * @param startOfBlock the token to check
-     * @param rcurly the end token to check
+     * @param rcurly       the end token to check
      * @return an empty line is required after the block and and not found
      */
     private boolean missingRequiredEmptyLineAfterBlock(DetailAST startOfBlock, DetailAST rcurly) {
@@ -285,7 +286,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      *
      * @param semiColonToken the end token to check
      * @return allowed if this statement is a variable def and the following is a block, if option
-     *         is set.
+     * is set.
      */
     private boolean hasAllowedNextSibling(DetailAST semiColonToken) {
         final DetailAST prev = semiColonToken.getPreviousSibling();
@@ -382,7 +383,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      * @param startLine number of the first line in the range
      * @param endLine   number of the second line in the range
      * @return {@code true} if found any blank line within the range, {@code false}
-     *     otherwise
+     * otherwise
      */
     private boolean hasEmptyLine(int startLine, int endLine) {
         // Initial value is false - blank line not found
@@ -394,7 +395,7 @@ public class MultilineStatementCheck extends AbstractCheck {
             for (int line = startLine; line <= endLine; line++) {
                 // Check, if the line is blank. Lines are numbered from 0, so subtract 1
                 if (fileContents.lineIsBlank(line - 1)
-                    || fileContents.lineIsComment(line - 1)) {
+                        || fileContents.lineIsComment(line - 1)) {
                     result = true;
                     break;
                 }
@@ -412,13 +413,14 @@ public class MultilineStatementCheck extends AbstractCheck {
      * </p>
      *
      * @param startOfBlock the startOfTheBlock (IF/TRY/OTHER)
-     * @param rcurly the original rcurly for the first block of the IF/TRY/OTHER
+     * @param rcurly       the original rcurly for the first block of the IF/TRY/OTHER
      * @return the real rcurly for the IF/TRY, if not a IF/TRY return rcurly
      */
     private static DetailAST findRealEndOfBlock(DetailAST startOfBlock, DetailAST rcurly) {
         DetailAST result = rcurly;
         if (startOfBlock.getType() == TokenTypes.LITERAL_IF
-                || startOfBlock.getType() == TokenTypes.LITERAL_TRY) {
+                || startOfBlock.getType() == TokenTypes.LITERAL_TRY
+                || startOfBlock.getType() == TokenTypes.LITERAL_DO) {
             result = lastDescendent(startOfBlock);
         }
 
@@ -435,8 +437,8 @@ public class MultilineStatementCheck extends AbstractCheck {
      */
     private static boolean shouldProcessRcurly(DetailAST rcurly) {
         boolean result = Arrays.binarySearch(NON_PROCESSABLE_RCURLY,
-            rcurly.getParent().getParent().getType()) < 0
-            && rcurly.getParent().getType() != TokenTypes.ARRAY_INIT;
+                rcurly.getParent().getParent().getType()) < 0
+                && rcurly.getParent().getType() != TokenTypes.ARRAY_INIT;
 
         if (result) {
             final DetailAST lcurlyParent = rcurly.getParent().getParent();
@@ -464,7 +466,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      * <p>is valid.
      *
      * @param startOfBlock the start of the block
-     * @param rcurly the end of the block
+     * @param rcurly       the end of the block
      * @return true if there exist another end block immediately following this end block.
      */
     private static boolean hasAllowedSiblingAfterBlock(DetailAST startOfBlock, DetailAST rcurly) {
@@ -534,6 +536,7 @@ public class MultilineStatementCheck extends AbstractCheck {
             case TokenTypes.LITERAL_SYNCHRONIZED:
             case TokenTypes.LITERAL_IF:
             case TokenTypes.LITERAL_WHILE:
+            case TokenTypes.LITERAL_DO:
             case TokenTypes.DO_WHILE:
             case TokenTypes.LITERAL_FOR:
             case TokenTypes.LITERAL_TRY:
@@ -561,8 +564,7 @@ public class MultilineStatementCheck extends AbstractCheck {
             // previous sibling is the actual statement previous to the statement the semi colon
             // is ending.
             previousStatement = semiColonToken.getPreviousSibling().getPreviousSibling();
-        }
-        else {
+        } else {
             // within the object body (i.e. member variables and statics) the semi colon is within
             // the statement its terminating, so we care about the parentStatement's previous
             previousStatement = parentStatement.getPreviousSibling();
@@ -640,6 +642,19 @@ public class MultilineStatementCheck extends AbstractCheck {
 
         return prev != null
                 && Arrays.binarySearch(FOR_LOOP_DEF, prev.getType()) >= 0;
+    }
+
+    /**
+     * See return documentation.
+     *
+     * @param semiColonToken to check
+     * @return true if this is part of a for loop definition
+     */
+    private static boolean isForEnumConst(DetailAST semiColonToken) {
+        final DetailAST prev = semiColonToken.getPreviousSibling();
+
+        return prev != null
+                && prev.getType() == TokenTypes.ENUM_CONSTANT_DEF;
     }
 
     /**

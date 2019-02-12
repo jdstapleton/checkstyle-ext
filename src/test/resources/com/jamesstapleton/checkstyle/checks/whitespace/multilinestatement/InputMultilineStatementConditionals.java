@@ -173,4 +173,25 @@ public class InputMultilineStatementConditionals {
             System.out.println();
         }
     }
+
+    public void validateDoWhile() {
+        boolean x = random.nextBoolean();
+
+        do {
+            System.out.println(random.nextInt() + ": X is " + x);
+            x = random.nextBoolean();
+        } while (x == true);
+
+        System.out.println("Finished proper while loop.  This next block should be considered in violation.");
+        do {
+            System.out.println(random.nextInt() + ": X is " + x);
+            x = random.nextBoolean();
+        } while (x == true);
+
+        do {
+            System.out.println(random.nextInt() + ": X is " + x);
+            x = random.nextBoolean();
+        } while (x == true);
+        System.out.println("Also bad.")
+    }
 }

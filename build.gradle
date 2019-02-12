@@ -1,8 +1,19 @@
 import javax.naming.ConfigurationException
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'checkstyle'
 apply plugin: 'maven-publish'
+apply plugin: 'io.codearte.nexus-staging'
 apply plugin: 'signing'
 
 repositories {
@@ -11,7 +22,7 @@ repositories {
 
 archivesBaseName = "checkstyle-ext"
 group = 'com.jamesstapleton.checkstyle'
-version = '1.0.1'
+version = '1.0.4'
 sourceCompatibility = 1.8
 
 checkstyle.toolVersion = '8.15'
@@ -49,6 +60,12 @@ signing {
 
     sign configurations.archives
 }
+
+nexusStaging {
+    packageGroup = 'com.jamesstapleton'
+}
+
+closeAndReleaseRepository.mustRunAfter 'publish'
 
 publishing {
     publications {

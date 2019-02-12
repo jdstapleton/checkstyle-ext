@@ -1,14 +1,12 @@
-package com.puppycrawl.tools.checkstyle.checks.whitespace;
-
-import static com.jamesstapleton.checkstyle.checks.whitespace.ReturnSeparationCheck.MSG_EMPTY_LINE_BEFORE_RETURN;
-
-import com.jamesstapleton.checkstyle.checks.whitespace.ReturnSeparationCheck;
-import org.junit.Test;
+package com.jamesstapleton.checkstyle.checks.whitespace;
 
 import com.google.common.reflect.Reflection;
 import com.puppycrawl.tools.checkstyle.AbstractModuleTestSupport;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
+import org.junit.Test;
+
+import static com.jamesstapleton.checkstyle.checks.whitespace.ReturnSeparationCheck.MSG_EMPTY_LINE_BEFORE_RETURN;
 
 public class ReturnSeparationCheckTest
         extends AbstractModuleTestSupport {
