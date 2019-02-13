@@ -286,7 +286,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      *
      * @param semiColonToken the end token to check
      * @return allowed if this statement is a variable def and the following is a block, if option
-     * is set.
+     *     is set.
      */
     private boolean hasAllowedNextSibling(DetailAST semiColonToken) {
         final DetailAST prev = semiColonToken.getPreviousSibling();
@@ -383,7 +383,7 @@ public class MultilineStatementCheck extends AbstractCheck {
      * @param startLine number of the first line in the range
      * @param endLine   number of the second line in the range
      * @return {@code true} if found any blank line within the range, {@code false}
-     * otherwise
+     *     otherwise
      */
     private boolean hasEmptyLine(int startLine, int endLine) {
         // Initial value is false - blank line not found
@@ -564,7 +564,8 @@ public class MultilineStatementCheck extends AbstractCheck {
             // previous sibling is the actual statement previous to the statement the semi colon
             // is ending.
             previousStatement = semiColonToken.getPreviousSibling().getPreviousSibling();
-        } else {
+        }
+        else {
             // within the object body (i.e. member variables and statics) the semi colon is within
             // the statement its terminating, so we care about the parentStatement's previous
             previousStatement = parentStatement.getPreviousSibling();

@@ -19,13 +19,14 @@
 
 package com.jamesstapleton.checkstyle.checks.whitespace;
 
+import static com.jamesstapleton.checkstyle.checks.whitespace.MultilineStatementCheck.MSG_KEY;
+
+import org.junit.Test;
+
 import com.google.common.reflect.Reflection;
 import com.puppycrawl.tools.checkstyle.AbstractModuleTestSupport;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
-import org.junit.Test;
-
-import static com.jamesstapleton.checkstyle.checks.whitespace.MultilineStatementCheck.MSG_KEY;
 
 public class MultilineStatementCheckTest
         extends AbstractModuleTestSupport {
@@ -170,7 +171,7 @@ public class MultilineStatementCheckTest
     public void validateEnum() throws Exception {
         final DefaultConfiguration checkConfig = createModuleConfig(MultilineStatementCheck.class);
 
-        final String[] expected = { };
+        final String[] expected = {};
 
         verify(createChecker(checkConfig),
                 getPath("InputMultilineStatementEnums.java"),
